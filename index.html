@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Work Log</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#2C3E66;
+    --navy-deep:#1E2C4A;
+    --slate:#4A90A4;
+    --amber:#E0A73C;
+    --cream:#F7F8FA;
+    --paper:#FFFFFF;
+    --ink:#252B36;
+    --ink-soft:#8A8F9B;
+    --line:rgba(44,62,102,0.14);
+    --shadow: 0 16px 36px rgba(37,43,54,0.12);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Nunito', sans-serif;
+    background: radial-gradient(circle at 15% 0%, #ECEFF5 0%, var(--cream) 45%);
+    color:var(--ink);
+    min-height:100vh;
+    display:flex; flex-direction:column; align-items:center;
+  }
+  h1,h2,h3,.display{font-family:'Poppins', sans-serif;}
+  .app{
+    width:100%; max-width:560px; min-height:100vh;
+    display:flex; flex-direction:column; position:relative;
+    background:var(--paper); box-shadow:var(--shadow);
+  }
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 18px; background:var(--navy); color:#fff;
+    position:sticky; top:0; z-index:30;
+  }
+  .topbar .brand{display:flex; align-items:center; gap:8px; font-weight:800; font-size:15px;}
+  .topbar .brand .ic{font-size:18px;}
+  .topbar-actions{display:flex; gap:8px;}
+  .icon-btn{
+    border:none; background:rgba(255,255,255,0.18); color:#fff;
+    width:34px;height:34px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-size:15px; transition:background .2s, transform .2s;
+  }
+  .icon-btn:hover{background:rgba(255,255,255,0.3); transform:scale(1.05);}
+  .back-btn{
+    border:none; background:rgba(255,255,255,0.18); color:#fff;
+    padding:8px 14px; border-radius:999px; font-weight:800; font-size:13px;
+    cursor:pointer; display:flex; align-items:center; gap:6px;
+  }
+
+  .content{flex:1; padding:18px 16px 40px;}
+
+  .hero{
+    display:flex; align-items:center; gap:14px;
+    background:linear-gradient(135deg, var(--navy), var(--navy-deep));
+    border-radius:22px; padding:18px; color:#fff; margin-bottom:16px;
+    box-shadow:var(--shadow);
+  }
+  .hero .em{font-size:40px; flex:none;}
+  .hero .txt h1{margin:0; font-size:19px; line-height:1.2;}
+  .hero .txt p{margin:4px 0 0; font-size:12px; opacity:.88;}
+
+  .new-btn{
+    width:100%; border:none; background:var(--amber); color:#3A2A0E;
+    font-family:'Poppins'; font-weight:700; font-size:14.5px;
+    padding:13px; border-radius:14px; cursor:pointer; margin-bottom:16px;
+    box-shadow:0 10px 20px rgba(224,167,60,0.3); transition:transform .15s;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+  }
+  .new-btn:hover{transform:translateY(-2px);}
+
+  .empty-state{ text-align:center; padding:44px 20px; color:var(--ink-soft); }
+  .empty-state .g{font-size:44px; margin-bottom:8px;}
+  .empty-state h3{margin:0 0 6px; color:var(--ink);}
+  .empty-state p{font-size:13px; line-height:1.5;}
+
+  .entry-list{display:flex; flex-direction:column; gap:12px;}
+  .entry-card{
+    background:var(--cream); border-radius:18px; padding:14px 16px;
+    display:flex; align-items:center; gap:12px; cursor:pointer;
+    border:2px solid transparent; transition:border-color .15s, transform .15s;
+    position:relative;
+  }
+  .entry-card:hover{border-color:var(--navy); transform:translateX(2px);}
+  .entry-card .swatch{
+    width:46px; height:46px; border-radius:12px; flex:none;
+    background:var(--navy); color:#fff; display:flex; align-items:center; justify-content:center;
+    font-size:19px;
+  }
+  .entry-card .info{flex:1; min-width:0;}
+  .entry-card .info .name{font-weight:800; font-size:15px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .entry-card .info .meta{font-size:12px; color:var(--ink-soft); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .entry-card .hours{ flex:none; font-size:12px; font-weight:800; color:var(--navy); background:#fff; border-radius:999px; padding:5px 10px; }
+  .entry-card .del{
+    position:absolute; top:8px; right:8px; border:none; background:transparent;
+    color:var(--ink-soft); font-size:13px; cursor:pointer; padding:4px;
+  }
+
+  .top-fields{
+    background:var(--paper); border:1px solid var(--line); border-radius:18px;
+    padding:16px; margin-bottom:16px; box-shadow:0 6px 16px rgba(37,43,54,0.05);
+  }
+  .two-col{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+  .field{margin-bottom:12px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{
+    display:block; font-size:11px; font-weight:800; color:var(--ink-soft);
+    text-transform:uppercase; letter-spacing:.4px; margin-bottom:5px;
+  }
+  .field input[type="text"], .field textarea{
+    width:100%; border:2px solid var(--line); border-radius:12px;
+    padding:9px 11px; font-size:14px; font-family:'Nunito'; color:var(--ink);
+    background:var(--cream); transition:border-color .15s;
+  }
+  .field input[type="text"]:focus, .field textarea:focus{outline:none; border-color:var(--navy);}
+
+  .summary-bar{
+    display:flex; justify-content:space-between; align-items:center;
+    background:var(--navy); color:#fff; border-radius:14px; padding:12px 16px; margin-bottom:16px;
+  }
+  .summary-bar .label{ font-size:12px; opacity:.85; font-weight:700; }
+  .summary-bar .value{ font-size:18px; font-weight:800; font-family:'Poppins'; }
+
+  .row-card{
+    background:var(--cream); border-radius:14px; padding:12px; margin-bottom:10px; position:relative;
+  }
+  .row-card:last-child{ margin-bottom:0; }
+  .row-card .rm{
+    position:absolute; top:8px; right:8px; border:none; background:transparent;
+    color:var(--ink-soft); font-size:13px; cursor:pointer;
+  }
+  .row-top{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
+  .row-mid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:8px; }
+  .row-card input{
+    width:100%; border:2px solid var(--line); border-radius:9px; padding:7px 9px;
+    font-size:12.5px; background:#fff; color:var(--ink);
+  }
+  .row-card input:focus{ outline:none; border-color:var(--navy); }
+  .row-mini-lbl{ font-size:9px; font-weight:800; color:var(--ink-soft); text-transform:uppercase; display:block; margin-bottom:3px; }
+
+  .add-row-btn{
+    border:2px dashed var(--line); background:transparent; color:var(--navy);
+    border-radius:12px; padding:11px; width:100%; font-weight:800; font-size:13px; cursor:pointer; margin-top:4px;
+  }
+
+  .export-btn{
+    width:100%; border:2px solid var(--navy); background:#fff; color:var(--navy);
+    font-family:'Nunito'; font-weight:800; font-size:13.5px;
+    padding:11px; border-radius:14px; cursor:pointer; margin-bottom:16px;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    transition:background .15s, color .15s;
+  }
+  .export-btn:hover{background:var(--navy); color:#fff;}
+
+  .save-note{ text-align:center; font-size:11px; color:var(--ink-soft); margin-top:6px; }
+
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(37,43,54,0.5);
+    display:none; align-items:center; justify-content:center; z-index:60; padding:20px;
+  }
+  .modal-backdrop.show{display:flex;}
+  .modal{background:#fff; border-radius:20px; padding:22px; max-width:340px; text-align:center;}
+  .modal h3{margin-top:0; font-family:'Poppins';}
+  .modal .row{display:flex; gap:10px; margin-top:16px;}
+  .modal button{flex:1; border:none; padding:11px; border-radius:999px; font-weight:800; cursor:pointer;}
+  .modal .confirm{background:var(--navy); color:#fff;}
+  .modal .cancel{background:var(--cream); color:var(--ink);}
+
+  .toast{
+    position:fixed; left:50%; bottom:20px; transform:translateX(-50%) translateY(20px);
+    max-width:480px; width:calc(100% - 32px);
+    background:#B93A3A; color:#fff; padding:13px 16px; border-radius:14px;
+    font-size:13px; font-weight:700; line-height:1.4; box-shadow:0 12px 28px rgba(0,0,0,0.25);
+    z-index:80; display:flex; align-items:flex-start; gap:10px;
+    opacity:0; pointer-events:none; transition:opacity .25s, transform .25s;
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
+  .toast .toast-ic{ font-size:16px; flex:none; }
+  .toast .toast-close{
+    flex:none; background:rgba(255,255,255,0.2); border:none; color:#fff;
+    width:22px; height:22px; border-radius:50%; cursor:pointer; font-size:12px;
+    display:flex; align-items:center; justify-content:center; margin-left:auto;
+  }
+
+  /* ---------- PRINT / PDF EXPORT ---------- */
+  #printArea{display:none;}
+  @media print{
+    body *{ visibility:hidden; }
+    #printArea, #printArea *{ visibility:visible; }
+    #printArea{ display:block; position:absolute; left:0; top:0; width:100%; padding:0; }
+    @page{ margin:12mm; }
+  }
+  .print-page{ font-family:'Nunito', sans-serif; color:#252B36; }
+  .print-page .p-header{ text-align:center; margin-bottom:14px; }
+  .print-page .p-header h1{ font-family:'Poppins'; font-size:20px; color:var(--navy); margin:0 0 2px; }
+  table.print-table{ width:100%; border-collapse:collapse; font-size:10px; margin-bottom:10px; }
+  table.print-table th, table.print-table td{ border:1px solid #ccc; padding:4px 5px; text-align:left; }
+  table.print-table th{ background:#E9EDF5; font-size:9px; text-transform:uppercase; }
+  .print-summary{ text-align:center; font-weight:800; color:var(--navy); font-size:13px; margin-bottom:10px; }
+  .print-footer{ text-align:center; font-size:9.5px; color:var(--ink-soft); margin-top:14px; }
+
+  @media (max-width:380px){ .row-mid{ grid-template-columns:1fr 1fr; } }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <div class="topbar">
+    <div id="topbarLeft" class="brand"><span class="ic">🕒</span><span>Work Log</span></div>
+    <div class="topbar-actions" id="topbarActions">
+      <button class="icon-btn" id="clearAllBtn" title="Clear all months">↺</button>
+    </div>
+  </div>
+  <div class="content" id="content"></div>
+</div>
+
+<div id="printArea"></div>
+
+<div class="modal-backdrop" id="confirmModal">
+  <div class="modal">
+    <h3 id="confirmTitle">Are you sure?</h3>
+    <p id="confirmBody" style="font-size:13px;color:var(--ink-soft)"></p>
+    <div class="row">
+      <button class="cancel" id="confirmCancel">Cancel</button>
+      <button class="confirm" id="confirmOk">Yes, do it</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="storageToast">
+  <span class="toast-ic">⚠️</span>
+  <span id="storageToastMsg">Storage is full — this didn't save.</span>
+  <button class="toast-close" id="storageToastClose">✕</button>
+</div>
+
+<script>
+const MONTHS_KEY = 'work-log:months';
+
+function blankRow(){ return { date:'', workActivity:'', note:'', startTime:'', endTime:'', totalHours:'' }; }
+function blankMonth(){
+  return {
+    id:'m'+Date.now()+Math.random().toString(36).slice(2,7),
+    createdAt: Date.now(),
+    month:'', year:'',
+    rows: Array.from({length:5}, blankRow)
+  };
+}
+
+let months = [];
+let view = 'list'; // 'list' | 'month'
+let currentId = null;
+
+function loadAll(){
+  try{ const raw = localStorage.getItem(MONTHS_KEY); months = raw ? JSON.parse(raw) : []; }catch(e){ months = []; }
+}
+function saveMonths(){
+  try{
+    localStorage.setItem(MONTHS_KEY, JSON.stringify(months));
+  }catch(e){
+    console.error(e);
+    showStorageToast('Storage is full, so that last change didn\'t save. Try deleting an old month to free up space.');
+  }
+}
+let storageToastTimer = null;
+function showStorageToast(msg){
+  const toast = document.getElementById('storageToast');
+  const msgEl = document.getElementById('storageToastMsg');
+  if(!toast || !msgEl) return;
+  msgEl.textContent = msg;
+  toast.classList.add('show');
+  if(storageToastTimer) clearTimeout(storageToastTimer);
+  storageToastTimer = setTimeout(()=>toast.classList.remove('show'), 7000);
+}
+
+function getMonth(id){ return months.find(m=>m.id===id); }
+
+function el(tag, cls, html){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html!==undefined) e.innerHTML = html;
+  return e;
+}
+function escapeHtml(str){
+  return String(str==null?'':str).replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+function sumHours(month){
+  return month.rows.reduce((sum, r)=>{
+    const n = parseFloat(r.totalHours);
+    return sum + (isNaN(n) ? 0 : n);
+  }, 0);
+}
+function fmtHours(n){
+  return (Math.round(n*100)/100).toString();
+}
+
+function render(){
+  const content = document.getElementById('content');
+  content.innerHTML = '';
+  const topbarLeft = document.getElementById('topbarLeft');
+  const topbarActions = document.getElementById('topbarActions');
+
+  if(view==='list'){
+    topbarLeft.innerHTML = `<span class="ic">🕒</span><span>Work Log</span>`;
+    topbarActions.innerHTML = `<button class="icon-btn" id="clearAllBtn" title="Clear all months">↺</button>`;
+    document.getElementById('clearAllBtn').addEventListener('click', confirmClearAll);
+    content.appendChild(renderList());
+  } else {
+    const month = getMonth(currentId);
+    topbarLeft.innerHTML = `<button class="back-btn" id="backBtn">‹ Log</button>`;
+    topbarActions.innerHTML = `<button class="icon-btn" id="printMonthBtn" title="Export / Print this month">🖨️</button><button class="icon-btn" id="deleteMonthBtn" title="Delete this month">🗑</button>`;
+    document.getElementById('backBtn').addEventListener('click', ()=>{ view='list'; render(); });
+    document.getElementById('printMonthBtn').addEventListener('click', ()=>exportMonthPDF(month));
+    document.getElementById('deleteMonthBtn').addEventListener('click', ()=>confirmDeleteMonth(month.id));
+    content.appendChild(renderMonthView(month));
+  }
+}
+
+// ---------- LIST VIEW ----------
+function renderList(){
+  const wrap = el('div');
+
+  const hero = el('div','hero');
+  hero.innerHTML = `
+    <div class="em">🕒</div>
+    <div class="txt">
+      <h1>Work Log</h1>
+      <p>${months.length} month${months.length===1?'':'s'} logged</p>
+    </div>
+  `;
+  wrap.appendChild(hero);
+
+  const newBtn = el('button','new-btn','+ Start a New Month');
+  newBtn.addEventListener('click', ()=>{
+    const m = blankMonth();
+    months.unshift(m);
+    saveMonths();
+    currentId = m.id;
+    view = 'month';
+    render();
+  });
+  wrap.appendChild(newBtn);
+
+  if(months.length===0){
+    const empty = el('div','empty-state');
+    empty.innerHTML = `<div class="g">🗂️</div><h3>No months yet</h3><p>Tap "Start a New Month" to begin logging your work days.</p>`;
+    wrap.appendChild(empty);
+    return wrap;
+  }
+
+  const list = el('div','entry-list');
+  months
+    .slice()
+    .sort((a,b)=> (b.updatedAt||b.createdAt) - (a.updatedAt||a.createdAt))
+    .forEach(month=>{
+      const card = el('div','entry-card');
+      const name = [month.month, month.year].filter(Boolean).join(' ') || 'Untitled month';
+      const daysLogged = month.rows.filter(r=>r.date || r.workActivity).length;
+      const total = sumHours(month);
+      card.innerHTML = `
+        <div class="swatch">📅</div>
+        <div class="info">
+          <div class="name">${escapeHtml(name)}</div>
+          <div class="meta">${daysLogged} day${daysLogged===1?'':'s'} logged</div>
+        </div>
+        ${total>0 ? `<div class="hours">${fmtHours(total)}h</div>` : ''}
+        <button class="del" data-id="${month.id}" title="Delete">✕</button>
+      `;
+      card.addEventListener('click', (e)=>{
+        if(e.target.closest('.del')) return;
+        currentId = month.id; view='month'; render();
+      });
+      card.querySelector('.del').addEventListener('click', (e)=>{
+        e.stopPropagation();
+        confirmDeleteMonth(month.id);
+      });
+      list.appendChild(card);
+    });
+  wrap.appendChild(list);
+  return wrap;
+}
+
+// ---------- MONTH VIEW ----------
+function renderMonthView(month){
+  const wrap = el('div');
+  function touch(){ month.updatedAt = Date.now(); saveMonths(); }
+
+  const exportBtn = el('button','export-btn','🖨️ Export / Print This Month');
+  exportBtn.addEventListener('click', ()=>exportMonthPDF(month));
+  wrap.appendChild(exportBtn);
+
+  const topFields = el('div','top-fields');
+  const row = el('div','two-col');
+  topFields.appendChild(row);
+  function textField(container, obj, key, labelText, placeholder){
+    const f = el('div','field');
+    f.innerHTML = `<label>${labelText}</label>`;
+    const inp = el('input'); inp.type='text'; inp.value = obj[key]||''; if(placeholder) inp.placeholder = placeholder;
+    inp.addEventListener('input', ()=>{ obj[key] = inp.value; touch(); render_summary(); });
+    f.appendChild(inp);
+    container.appendChild(f);
+  }
+  textField(row, month, 'month', 'Month', 'e.g. July');
+  textField(row, month, 'year', 'Year', 'e.g. 2026');
+  wrap.appendChild(topFields);
+
+  const summaryBar = el('div','summary-bar');
+  wrap.appendChild(summaryBar);
+  function render_summary(){
+    const total = sumHours(month);
+    const daysLogged = month.rows.filter(r=>r.date || r.workActivity).length;
+    summaryBar.innerHTML = `<span class="label">${daysLogged} day${daysLogged===1?'':'s'} logged</span><span class="value">${fmtHours(total)} hrs</span>`;
+  }
+  render_summary();
+
+  const rowsBlock = el('div','top-fields');
+  const rowsWrap = el('div');
+  function renderRows(){
+    rowsWrap.innerHTML = '';
+    month.rows.forEach((r, i)=>{
+      const card = el('div','row-card');
+      if(month.rows.length>1){
+        const rm = el('button','rm','✕');
+        rm.addEventListener('click', ()=>{ month.rows.splice(i,1); touch(); renderRows(); render_summary(); });
+        card.appendChild(rm);
+      }
+      function miniField(container, key, labelText, placeholder){
+        const f = el('div');
+        f.innerHTML = `<span class="row-mini-lbl">${labelText}</span>`;
+        const inp = el('input'); inp.type='text'; inp.value = r[key]||''; if(placeholder) inp.placeholder = placeholder;
+        inp.addEventListener('input', ()=>{ r[key] = inp.value; touch(); if(key==='totalHours') render_summary(); });
+        f.appendChild(inp);
+        container.appendChild(f);
+      }
+      const top = el('div','row-top');
+      miniField(top, 'date', 'Date');
+      miniField(top, 'workActivity', 'Work Activity');
+      card.appendChild(top);
+
+      const noteWrap = el('div', null, '');
+      noteWrap.style.marginBottom = '8px';
+      miniField(noteWrap, 'note', 'Note');
+      card.appendChild(noteWrap);
+
+      const mid = el('div','row-mid');
+      miniField(mid, 'startTime', 'Start Time');
+      miniField(mid, 'endTime', 'End Time');
+      miniField(mid, 'totalHours', 'Total Hours');
+      card.appendChild(mid);
+
+      rowsWrap.appendChild(card);
+    });
+  }
+  renderRows();
+  rowsBlock.appendChild(rowsWrap);
+  const addBtn = el('button','add-row-btn','+ Add Another Day');
+  addBtn.addEventListener('click', ()=>{ month.rows.push(blankRow()); touch(); renderRows(); render_summary(); });
+  rowsBlock.appendChild(addBtn);
+  wrap.appendChild(rowsBlock);
+
+  const note = el('div','save-note','Everything here saves automatically on this device.');
+  wrap.appendChild(note);
+
+  return wrap;
+}
+
+// ---------- print / PDF export ----------
+function pv(val){ return val ? escapeHtml(val) : '—'; }
+function exportMonthPDF(month){
+  const area = document.getElementById('printArea');
+  const rowsHtml = month.rows
+    .filter(r=>r.date||r.workActivity||r.note||r.startTime||r.endTime||r.totalHours)
+    .map(r=>`<tr><td>${pv(r.date)}</td><td>${pv(r.workActivity)}</td><td>${pv(r.note)}</td><td>${pv(r.startTime)}</td><td>${pv(r.endTime)}</td><td>${pv(r.totalHours)}</td></tr>`)
+    .join('');
+  const total = sumHours(month);
+
+  area.innerHTML = `
+    <div class="print-page">
+      <div class="p-header">
+        <h1>🕒 Work Log</h1>
+        <div style="font-size:12px;color:var(--ink-soft)">${escapeHtml([month.month, month.year].filter(Boolean).join(' ')) || 'Untitled month'}</div>
+      </div>
+      <div class="print-summary">${fmtHours(total)} total hours logged</div>
+      <table class="print-table">
+        <thead><tr><th>Date</th><th>Work Activity</th><th>Note</th><th>Start</th><th>End</th><th>Total Hrs</th></tr></thead>
+        <tbody>${rowsHtml || '<tr><td colspan="6">No work days logged</td></tr>'}</tbody>
+      </table>
+      <div class="print-footer">Work Log — exported from your digital log</div>
+    </div>
+  `;
+  setTimeout(()=>window.print(), 60);
+}
+
+// ---------- confirm modal ----------
+function showConfirm(title, body, onOk){
+  const modal = document.getElementById('confirmModal');
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmBody').textContent = body;
+  modal.classList.add('show');
+  const okBtn = document.getElementById('confirmOk');
+  const cancelBtn = document.getElementById('confirmCancel');
+  const cleanup = ()=>{ modal.classList.remove('show'); okBtn.onclick=null; cancelBtn.onclick=null; };
+  okBtn.onclick = ()=>{ cleanup(); onOk(); };
+  cancelBtn.onclick = cleanup;
+}
+function confirmClearAll(){
+  showConfirm('Clear the whole log?', 'This deletes every month you\'ve logged on this device. It can\'t be undone.', ()=>{
+    months = []; saveMonths(); render();
+  });
+}
+function confirmDeleteMonth(id){
+  showConfirm('Delete this month?', 'This month and all its logged days will be gone for good.', ()=>{
+    months = months.filter(m=>m.id!==id);
+    saveMonths();
+    if(view==='month' && currentId===id){ view='list'; }
+    render();
+  });
+}
+
+document.getElementById('storageToastClose').addEventListener('click', ()=>{
+  document.getElementById('storageToast').classList.remove('show');
+  if(storageToastTimer) clearTimeout(storageToastTimer);
+});
+
+// ---------- boot ----------
+loadAll();
+render();
+</script>
+</body>
+</html>
